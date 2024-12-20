@@ -13,7 +13,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -187,5 +192,37 @@ public class ContractServiceImpl implements ContractService {
         contractMapper.updateContract(contract);
 
         return "合同修改成功";
+    }
+
+    @Override
+    public BigDecimal calculateTotalSales() {
+        return contractMapper.sumTotalSales(); // 获取所有已支付合同的销售总额
+    }
+
+    @Override
+    public BigDecimal calculateSalesInPeriod(LocalDateTime startDate, LocalDateTime endDate) {
+        return contractMapper.sumTotalSalesInPeriod(startDate, endDate); // 获取指定时间段内已支付合同的销售额
+    }
+
+    @Override
+    public List<Map<String, Object>> getCustomerSales() {
+        // 从合同表和客户表获取各客户的销售额
+        return contractMapper.findCustomerSales().stream().map(row -> {
+            Map<String, Object> result = new HashMap<>();
+            result.put("customerName", row.get("customerName"));
+            result.put("sales", row.get("totalSales"));
+            return result;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Map<String, Object>> getProductSales() {
+        // 从合同表和商品表获取各商品的销售额
+        return contractMapper.findProductSales().stream().map(row -> {
+            Map<String, Object> result = new HashMap<>();
+            result.put("productName", row.get("productName"));
+            result.put("sales", row.get("totalSales"));
+            return result;
+        }).collect(Collectors.toList());
     }
 }

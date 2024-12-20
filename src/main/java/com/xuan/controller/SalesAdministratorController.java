@@ -12,9 +12,11 @@ import com.xuan.pojo.vo.SaleSpersonVO;
 import com.xuan.result.Result;
 import com.xuan.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -243,5 +245,50 @@ public class SalesAdministratorController {
             return Result.error(result);
         }
         return Result.success(result);
+    }
+
+    /**
+     * 销售管理员 - 查询总销售额和指定时间段内的销售额
+     * @param startDate 开始日期
+     * @param endDate 结束日期
+     * @return 销售总额和时间段内销售额
+     */
+    @GetMapping("/sales/performance-summary")
+    public Result<Map<String, BigDecimal>> getSalesPerformanceSummary(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+
+        // 将 LocalDate 转换为 LocalDateTime，时间部分默认为 00:00:00
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 开始时间
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59); // 结束时间，设置为当天的最后一刻
+
+        BigDecimal totalSales = contractService.calculateTotalSales(); // 查询所有订单的总销售额
+        BigDecimal inPeriodSales = contractService.calculateSalesInPeriod(startDateTime, endDateTime); // 在指定时间段内的销售额
+
+        Map<String, BigDecimal> result = new HashMap<>();
+        result.put("totalSales", totalSales);
+        result.put("inPeriodSales", inPeriodSales);
+
+        return Result.success(result);
+    }
+
+    /**
+     * 销售管理员 - 查询各客户的销售额
+     * @return 客户销售额列表
+     */
+    @GetMapping("/customer-sales")
+    public Result<List<Map<String, Object>>> getCustomerSales() {
+        List<Map<String, Object>> customerSales = contractService.getCustomerSales();
+        return Result.success(customerSales);
+    }
+
+    /**
+     * 销售管理员 - 查询各商品的销售额
+     * @return 商品销售额列表
+     */
+    @GetMapping("/product-sales")
+    public Result<List<Map<String, Object>>> getProductSales() {
+        List<Map<String, Object>> productSales = contractService.getProductSales();
+        return Result.success(productSales);
     }
 }

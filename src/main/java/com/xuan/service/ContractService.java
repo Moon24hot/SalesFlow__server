@@ -5,7 +5,11 @@ import com.xuan.pojo.entity.Contract;
 import com.xuan.pojo.entity.ContractDetail;
 import com.xuan.pojo.vo.ContractVO;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public interface ContractService {
     void saveContract(Contract contract);
@@ -37,4 +41,12 @@ public interface ContractService {
      * @return 操作结果
      */
     String updateContract(ContractUpdateDTO contractUpdateDTO);
+
+    BigDecimal calculateTotalSales(); // 查询所有已支付订单的总销售额
+
+    BigDecimal calculateSalesInPeriod(LocalDateTime startDate, LocalDateTime endDate); // 查询指定时间段内的销售额
+
+    List<Map<String, Object>> getCustomerSales();
+
+    List<Map<String, Object>> getProductSales();
 }
