@@ -1,11 +1,16 @@
 package com.xuan.controller;
 
+import com.xuan.pojo.dto.SalesPerformanceDTO;
 import com.xuan.pojo.vo.ContractVO;
 import com.xuan.result.Result;
 import com.xuan.service.ContractService;
+import com.xuan.service.SaleSpersonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -17,6 +22,9 @@ public class SaleSpersonController {
 
     @Autowired
     private ContractService contractService;
+
+    @Autowired
+    private SaleSpersonService saleSpersonService;
 
     /**
      * 销售人员-查询自己相关的合同列表
@@ -55,6 +63,29 @@ public class SaleSpersonController {
         }
 
         return Result.success("合同ID [" + contractId + "] 的支付状态修改为已支付，销售额已更新");
+    }
+
+    /**
+     * 销售人员-查询销售业绩
+     * @param salespersonId 销售人员ID
+     * @param startDate     开始日期
+     * @param endDate       结束日期
+     * @return 销售业绩数据
+     */
+    @GetMapping("/performance/{id}")
+    public Result<SalesPerformanceDTO> getSalesPerformance(
+            @PathVariable("id") Integer salespersonId,
+            @RequestParam
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+
+        // 将 LocalDate 转换为 LocalDateTime，时间部分默认为 00:00:00
+        LocalDateTime startDateTime = startDate.atStartOfDay(); // 开始时间
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59); // 结束时间，设置为当天的最后一刻
+
+        SalesPerformanceDTO performance = saleSpersonService.getSalesPerformance(salespersonId, startDateTime, endDateTime);
+        return Result.success(performance);
     }
 }
 

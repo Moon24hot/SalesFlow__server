@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -71,4 +73,22 @@ public interface ContractMapper {
      */
     @Update("UPDATE contract SET customer_id = #{customerId}, salesperson_id = #{salespersonId} WHERE id = #{id}")
     int updateContract(Contract contract);
+
+    /**
+     * 计算在指定日期范围内特定销售人员的总销售额
+     */
+    @Select("SELECT SUM(amount) FROM contract WHERE salesperson_id = #{salespersonId} " +
+            "AND pay_status = 1 AND sign_date BETWEEN #{startDate} AND #{endDate}")
+    BigDecimal sumTotalSalesBySalespersonAndDateRange(@Param("salespersonId") Integer salespersonId,
+                                                      @Param("startDate") LocalDateTime startDate,
+                                                      @Param("endDate") LocalDateTime endDate);
+
+    /**
+     * 统计在指定日期范围内特定销售人员的合同数量
+     */
+    @Select("SELECT COUNT(*) FROM contract WHERE salesperson_id = #{salespersonId} " +
+            "AND pay_status = 1 AND sign_date BETWEEN #{startDate} AND #{endDate}")
+    int countContractsBySalespersonAndDateRange(@Param("salespersonId") Integer salespersonId,
+                                                @Param("startDate") LocalDateTime startDate,
+                                                @Param("endDate") LocalDateTime endDate);
 }

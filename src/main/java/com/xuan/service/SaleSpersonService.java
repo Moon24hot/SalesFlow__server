@@ -1,9 +1,11 @@
 package com.xuan.service;
 
+import com.xuan.pojo.dto.SalesPerformanceDTO;
 import com.xuan.pojo.dto.SalespersonDTO;
 import com.xuan.pojo.entity.SaleSperson;
 import com.xuan.pojo.vo.SaleSpersonVO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface SaleSpersonService {
@@ -30,4 +32,15 @@ public interface SaleSpersonService {
      * @return 是否成功
      */
     boolean updateSalesperson(SalespersonDTO salespersonDTO);
+
+    /**
+     * 根据销售人员 ID 和日期范围查询销售业绩
+     *
+     * @param salespersonId 销售人员ID
+     * @param startDate     开始日期
+     * @param endDate       结束日期
+     * @return 销售业绩数据
+     */
+    SalesPerformanceDTO getSalesPerformance
+    (Integer salespersonId, LocalDateTime startDate, LocalDateTime endDate);
 }

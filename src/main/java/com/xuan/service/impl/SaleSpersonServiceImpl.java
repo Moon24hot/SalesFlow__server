@@ -1,6 +1,8 @@
 package com.xuan.service.impl;
 
+import com.xuan.mapper.ContractMapper;
 import com.xuan.mapper.SaleSpersonMapper;
+import com.xuan.pojo.dto.SalesPerformanceDTO;
 import com.xuan.pojo.dto.SalespersonDTO;
 import com.xuan.pojo.entity.SaleSperson;
 import com.xuan.pojo.vo.SaleSpersonVO;
@@ -8,6 +10,8 @@ import com.xuan.service.SaleSpersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +20,9 @@ public class SaleSpersonServiceImpl implements SaleSpersonService {
 
     @Autowired
     private SaleSpersonMapper saleSpersonMapper;
+
+    @Autowired
+    private ContractMapper contractMapper;
 
     @Override
     public SaleSperson findByName(String name) {
@@ -59,4 +66,26 @@ public class SaleSpersonServiceImpl implements SaleSpersonService {
         return false; // 如果销售人员不存在，返回 false
     }
 
+    @Override
+    public SalesPerformanceDTO getSalesPerformance(Integer salespersonId,
+                                                   LocalDateTime startDate,
+                                                   LocalDateTime endDate) {
+// 获取销售人员的历史销售额
+        SaleSperson salesperson = saleSpersonMapper.findById(salespersonId);
+
+        // 将历史销售额从 Double 转换为 BigDecimal
+        BigDecimal historicalSales = BigDecimal.valueOf(salesperson.getAmount()); // 历史销售额
+
+        // 从合同表中查询在指定日期范围内已支付合同的总销售额和签订合同数
+        BigDecimal totalSales = contractMapper.sumTotalSalesBySalespersonAndDateRange(salespersonId, startDate, endDate);
+        int contractCount = contractMapper.countContractsBySalespersonAndDateRange(salespersonId, startDate, endDate);
+
+        // 返回结果
+        SalesPerformanceDTO performanceDTO = new SalesPerformanceDTO();
+        performanceDTO.setTotalSales(totalSales);
+        performanceDTO.setContractCount(contractCount);
+        performanceDTO.setHistoricalSales(historicalSales);
+
+        return performanceDTO;
+    }
 }
